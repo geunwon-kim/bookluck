@@ -1,3 +1,12 @@
 /Users/kgw/Files/java/bookluck_test/bookluck1/src/main/java/com/example/bookluck1/Book.java
 /Users/kgw/Files/java/bookluck_test/bookluck1/src/main/java/com/example/bookluck1/Bookluck1Application.java
+/Users/kgw/Files/java/bookluck_test/bookluck1/src/main/java/com/example/bookluck1/controller/HomeController.java
 /Users/kgw/Files/java/bookluck_test/bookluck1/src/main/java/com/example/bookluck1/controller/UserController.java
+/Users/kgw/Files/java/bookluck_test/bookluck1/src/main/java/com/example/bookluck1/domain/Book.java
+/Users/kgw/Files/java/bookluck_test/bookluck1/src/main/java/com/example/bookluck1/domain/User.java
+/Users/kgw/Files/java/bookluck_test/bookluck1/src/main/java/com/example/bookluck1/dto/BookDto.java
+/Users/kgw/Files/java/bookluck_test/bookluck1/src/main/java/com/example/bookluck1/dto/UserDto.java
+/Users/kgw/Files/java/bookluck_test/bookluck1/src/main/java/com/example/bookluck1/repository/BookRepository.java
+/Users/kgw/Files/java/bookluck_test/bookluck1/src/main/java/com/example/bookluck1/repository/MemoryBookRepository.java
+/Users/kgw/Files/java/bookluck_test/bookluck1/src/main/java/com/example/bookluck1/repository/UserRepository.java
+/Users/kgw/Files/java/bookluck_test/bookluck1/src/main/java/com/example/bookluck1/service/UserService.java
