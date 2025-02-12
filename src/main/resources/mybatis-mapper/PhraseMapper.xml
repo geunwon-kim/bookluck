@@ -7,5 +7,10 @@
     <select id="findAll" resultType="com.study.bookluck.entity.Phrase">
         SELECT * FROM phrase
     </select>
+
+    <select id="findPhrase" resultType="com.study.bookluck.entity.Phrase">
+        SELECT * FROM phrase
+        where id = #{id}
+    </select>
  
 </mapper>

@@ -10,4 +10,5 @@ import java.util.List;
 @Mapper
 public interface PhraseMapper {
     List<Phrase> findAll();
+    Phrase findPhrase(int id);
 }

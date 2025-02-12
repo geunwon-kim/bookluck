@@ -16,4 +16,10 @@ public class PhraseService {
     public List<Phrase> getAllPhrases() {
         return phraseMapper.findAll();
     }
+
+    public Phrase getRandomPhrase(){
+        int rand_num = (int)(Math.random() * 45)+1;
+
+        return phraseMapper.findPhrase(rand_num);
+    }
 }

@@ -13,9 +13,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class PhraseController {
     private final PhraseService phraseService;
  
-    @GetMapping("/phrases")
+    @GetMapping("/phrases/getPhrases")
     @ResponseBody
     public ResponseEntity getPhrases() {
         return ResponseEntity.ok(phraseService.getAllPhrases());
+    }
+
+    @GetMapping("/phrases/getRandomPhrase")
+    @ResponseBody
+    public ResponseEntity getPhrase() {
+        return ResponseEntity.ok(phraseService.getRandomPhrase());
     }
 }
