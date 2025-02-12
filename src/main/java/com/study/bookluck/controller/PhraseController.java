@@ -4,6 +4,7 @@ import com.study.bookluck.service.PhraseService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +20,7 @@ public class PhraseController {
         return ResponseEntity.ok(phraseService.getAllPhrases());
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/phrases/getRandomPhrase")
     @ResponseBody
     public ResponseEntity getPhrase() {
