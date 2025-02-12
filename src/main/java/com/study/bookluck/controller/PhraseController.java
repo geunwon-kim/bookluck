@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
  
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 @RestController
 public class PhraseController {
@@ -20,7 +21,6 @@ public class PhraseController {
         return ResponseEntity.ok(phraseService.getAllPhrases());
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/phrases/getRandomPhrase")
     @ResponseBody
     public ResponseEntity getPhrase() {
