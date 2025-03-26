@@ -10,4 +10,5 @@ import java.util.List;
 @Mapper
 public interface BookMapper {
     List<Book> findAll();
+    void insertBooks(List<Book> books);
 }

@@ -7,5 +7,24 @@
     <select id="findAll" resultType="com.study.bookluck.entity.Book">
         SELECT * FROM book_list
     </select>
+
+    <!-- 데이터 저장 -->
+    <insert id="insertBooks">
+        INSERT INTO book_list (title, link, image, author, publisher, description, pubdate, isbn, created_by)
+        VALUES
+        <foreach collection="list" item="book" separator=",">
+            (#{book.title}, #{book.link}, #{book.image}, #{book.author}, #{book.publisher}, 
+             #{book.description}, #{book.pubdate}, #{book.isbn}, #{book.created_by})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        title = VALUES(title),
+        link = VALUES(link),
+        image = VALUES(image),
+        author = VALUES(author),
+        publisher = VALUES(publisher),
+        description = VALUES(description),
+        pubdate = VALUES(pubdate),
+        created_by = VALUES(created_by)
+    </insert>
  
 </mapper>
