@@ -69,7 +69,7 @@ public class BookService {
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> resp = restTemplate.exchange(req, String.class);
 
-            System.out.println(resp);
+            // System.out.println(resp);
             
             // JSON 파싱 (Json 문자열을 객체로 만듦, 문서화)
             ObjectMapper om = new ObjectMapper();
