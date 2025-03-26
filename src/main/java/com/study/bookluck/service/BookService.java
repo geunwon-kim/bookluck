@@ -52,7 +52,7 @@ public class BookService {
         		  .fromUriString("https://openapi.naver.com")
         		  .path("/v1/search/book.json")
         		  .queryParam("query", keyword)
-        		  .queryParam("display", 10)
+        		  .queryParam("display", 100)
         		  .queryParam("start", 1)
         		  .queryParam("sort", "sim")
         		  .encode()
