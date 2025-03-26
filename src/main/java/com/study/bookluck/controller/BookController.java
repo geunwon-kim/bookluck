@@ -15,21 +15,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class BookController {
     private final BookService bookService;
  
-    @GetMapping("/books")
+    @GetMapping("/books/getAllBooks")
     @ResponseBody
     public ResponseEntity getBooks() {
         return ResponseEntity.ok(bookService.getAllBooks());
     }
 
-    @PostMapping("/books-post")
+    @PostMapping("/books-post/getAllBooks")
     @ResponseBody
 	public ResponseEntity getBooks_post() {
 		return ResponseEntity.ok(bookService.getAllBooks());
     }
 
-    @GetMapping("/books-api")
+    @GetMapping("/books/getApiBooks")
     @ResponseBody
 	public ResponseEntity<?> getBooks_API(@RequestParam(name = "keyword") String keyword) {
 		return ResponseEntity.ok(bookService.apiBooks(keyword));
     }
 }
+
