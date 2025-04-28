@@ -21,8 +21,12 @@ public class Book {
     private String author;
     private String publisher;
     private String description;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
-    private Date pubdate;
-    private long isbn;
-    private int created_by;
+    // @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
+    private String pubdate;
+    private String isbn;
+    private String discount;
+    private Integer price;
+    private Integer sale_price;
+    private String category1;
+    private String category2;
 }

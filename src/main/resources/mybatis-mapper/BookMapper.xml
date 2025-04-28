@@ -1,20 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
- 
+
 <mapper namespace="com.study.bookluck.repository.BookMapper">
- 
+
     <select id="findAll" resultType="com.study.bookluck.entity.Book">
-        SELECT * FROM book_list
+        SELECT
+            id,
+            title,
+            link,
+            image,
+            author,
+            publisher,
+            description,
+            pubdate,
+            isbn,
+            discount,
+            price,
+            sale_price,
+            category1,
+            category2,
+            created_at,
+            updated_at
+        FROM book_list
     </select>
 
-    <!-- 데이터 저장 -->
     <insert id="insertBooks">
-        INSERT INTO book_list (title, link, image, author, publisher, description, pubdate, isbn, created_by)
+        INSERT INTO book_list (title, link, image, author, publisher, description, pubdate, isbn, discount, price, sale_price, category1, category2)
         VALUES
         <foreach collection="list" item="book" separator=",">
-            (#{book.title}, #{book.link}, #{book.image}, #{book.author}, #{book.publisher}, 
-             #{book.description}, #{book.pubdate}, #{book.isbn}, #{book.created_by})
+            (#{book.title}, #{book.link}, #{book.image}, #{book.author}, #{book.publisher},
+             #{book.description}, #{book.pubdate}, #{book.isbn}, #{book.discount}, #{book.price}, #{book.sale_price}, #{book.category1}, #{book.category2})
         </foreach>
         ON DUPLICATE KEY UPDATE
         title = VALUES(title),
@@ -24,7 +40,11 @@
         publisher = VALUES(publisher),
         description = VALUES(description),
         pubdate = VALUES(pubdate),
-        created_by = VALUES(created_by)
+        discount = VALUES(discount),
+        price = VALUES(price),
+        sale_price = VALUES(sale_price),
+        category1 = VALUES(category1),
+        category2 = VALUES(category2)
     </insert>
- 
+
 </mapper>

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.study.bookluck.entity.Book;
+import com.study.bookluck.entity.FavoriteBook;
 import com.study.bookluck.repository.BookMapper;
+import com.study.bookluck.repository.FavoriteBookMapper;
 import com.study.bookluck.entity.NaverResult;
 
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -23,12 +26,15 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
  
 @Service
 @RequiredArgsConstructor
 
 public class BookService {
     private final BookMapper bookMapper;
+    private final FavoriteBookMapper favoriteBookMapper;
 
     // 네이버 도서 검색 api key
     private final String CLIENT_ID = "LyhjhAt1_1TNffOFXhE2";
@@ -59,7 +65,7 @@ public class BookService {
         		  .build()
         		  .toUri();
 
-            // Spring 요청 제공 클래스 
+            // Spring 요청 제공 클래스
             RequestEntity<Void> req = RequestEntity
                                     .get(url)
                                     .header("X-Naver-Client-Id", CLIENT_ID)
@@ -107,5 +113,37 @@ public class BookService {
 
         return books;
 
+    }
+
+    @Transactional
+    public boolean addBookToFavorites(String userId, String bookId) {
+        Optional<FavoriteBook> existingFavorite = favoriteBookMapper.findByUserIdAndBookId(userId, bookId);
+        if (existingFavorite.isPresent()) {
+            return false; // 이미 추가됨
+        }
+
+        FavoriteBook favoriteBook = FavoriteBook.builder()
+                .userId(userId)
+                .bookId(bookId)
+                .build();
+
+        favoriteBookMapper.insertFavorite(favoriteBook);
+        return true; // 성공적으로 추가
+    }
+
+    public List<String> getFavoriteBookIds(String userId) {
+        return favoriteBookMapper.findByUserId(userId).stream()
+                .map(FavoriteBook::getBookId)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public boolean removeBookFromFavorites(String userId, String bookId) {
+        Optional<FavoriteBook> existingFavorite = favoriteBookMapper.findByUserIdAndBookId(userId, bookId);
+        if (existingFavorite.isPresent()) {
+            favoriteBookMapper.deleteByUserIdAndBookId(userId, bookId);
+            return true; // 성공적으로 삭제
+        }
+        return false; // 즐겨찾기에 없음
     }
 }
