@@ -1,5 +1,6 @@
 package com.study.bookluck.repository;
 
+import com.study.bookluck.entity.Book;
 import com.study.bookluck.entity.FavoriteBook;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -21,4 +22,7 @@ public interface FavoriteBookMapper {
     void deleteByUserId(String userId);
 
     void deleteByBookId(String bookId);
+
+    List<Book> findFavoriteBooksDetailsByUserId(@Param("userId") Integer userId);
+
 }

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.study.bookluck.repository.BookRecordMapper">
+
+    <insert id="insertBookRecord">
+        INSERT INTO book_record (user_id, status, book_id, end_date, duration, review)
+        VALUES (#{userId}, #{status}, #{bookId}, #{endDate}, #{duration}, #{review})
+    </insert>
+
+    <select id="findByUserId" resultType="com.study.bookluck.entity.BookRecord">
+        SELECT
+            id,
+            user_id AS userId,
+            status,
+            book_id AS bookId,
+            end_date AS endDate,
+            duration,
+            review,
+            record_at AS recordAt
+        FROM
+            book_record
+        WHERE
+            user_id = #{userId}
+    </select>
+
+    <select id="findByBookId" resultType="com.study.bookluck.entity.BookRecord">
+        SELECT
+            id,
+            user_id AS userId,
+            status,
+            book_id AS bookId,
+            end_date AS endDate,
+            duration,
+            review,
+            record_at AS recordAt
+        FROM
+            book_record
+        WHERE
+            book_id = #{bookId}
+    </select>
+
+    <select id="findByUserIdAndBookId" resultType="com.study.bookluck.entity.BookRecord">
+        SELECT
+            id,
+            user_id AS userId,
+            status,
+            book_id AS bookId,
+            end_date AS endDate,
+            duration,
+            review,
+            record_at AS recordAt
+        FROM
+            book_record
+        WHERE
+            user_id = #{userId} AND book_id = #{bookId}
+    </select>
+
+    <delete id="deleteBookRecord">
+        DELETE FROM book_record
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

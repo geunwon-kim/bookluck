@@ -4,10 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.study.bookluck.entity.Book;
+import com.study.bookluck.entity.BookRecord;
 import com.study.bookluck.entity.FavoriteBook;
 import com.study.bookluck.repository.BookMapper;
+import com.study.bookluck.repository.BookRecordMapper;
 import com.study.bookluck.repository.FavoriteBookMapper;
 import com.study.bookluck.entity.NaverResult;
+import com.study.bookluck.dto.BookDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +27,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +38,7 @@ import java.util.stream.Collectors;
 
 public class BookService {
     private final BookMapper bookMapper;
+    private final BookRecordMapper bookRecordMapper;
     private final FavoriteBookMapper favoriteBookMapper;
 
     // 네이버 도서 검색 api key
@@ -146,4 +151,60 @@ public class BookService {
         }
         return false; // 즐겨찾기에 없음
     }
+
+    @Transactional
+    public boolean addBookRecord(Integer userId, String status, String bookId, Integer duration, LocalDate endDate, String review) {
+
+        BookRecord bookRecord = BookRecord.builder()
+                .userId(userId)
+                .status(status)
+                .bookId(bookId)
+                .duration(duration)
+                .endDate(endDate)
+                .review(review)
+                .build();
+
+        bookRecordMapper.insertBookRecord(bookRecord);
+
+        return true; // 성공적으로 기록
+    }
+
+    // 특정 사용자의 모든 책 기록 조회 (추가 기능)
+    public List<BookRecord> getUserBookRecords(Integer userId) {
+        return bookRecordMapper.findByUserId(userId);
+    }
+
+    public List<BookDto> getUserFavoriteBooksDetails(Integer userId) {
+        // MyBatis 사용 시
+        List<Book> favoriteBooks = favoriteBookMapper.findFavoriteBooksDetailsByUserId(userId);
+        return favoriteBooks.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+
+        // Spring Data JPA 사용 시 (위의 FavoriteBookRepository 참고)
+        /*
+        return favoriteBookRepository.findFavoriteBooksDetailsByUserId(userId).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        */
+    }
+
+    private BookDto convertToDto(Book book) {
+        return BookDto.builder()
+                .id(book.getId())
+                .title(book.getTitle())
+                .link(book.getLink())
+                .image(book.getImage())
+                .author(book.getAuthor())
+                .publisher(book.getPublisher())
+                .description(book.getDescription())
+                .pubdate(book.getPubdate())
+                .isbn(book.getIsbn())
+                .discount(book.getDiscount())
+                .price(book.getPrice())
+                .category1(book.getCategory1())
+                .category2(book.getCategory2())
+                .build();
+    }
+
 }

@@ -48,4 +48,30 @@
         WHERE book_id = #{bookId}
     </delete>
 
+    <select id="findFavoriteBooksDetailsByUserId" resultType="com.study.bookluck.entity.Book">
+        SELECT
+            bl.id,
+            bl.title,
+            bl.link,
+            bl.image,
+            bl.author,
+            bl.publisher,
+            bl.description,
+            bl.pubdate,
+            bl.isbn,
+            bl.discount,
+            bl.price,
+            bl.sale_price,
+            bl.category1,
+            bl.category2,
+            bl.created_at,
+            bl.updated_at
+        FROM
+            book_fav fb -- 테이블 이름 변경
+        JOIN
+            book_list bl ON fb.book_id = bl.isbn
+        WHERE
+            fb.user_id = #{userId}
+    </select>
+
 </mapper>

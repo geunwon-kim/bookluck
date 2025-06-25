@@ -15,6 +15,7 @@ import lombok.ToString;
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)  // JSON의 알 수 없는 필드 무시
 public class Book {
+    private Long id;
     private String title;
     private String link;
     private String image;

@@ -1,9 +1,12 @@
 package com.study.bookluck.controller;
 
+import com.study.bookluck.entity.BookRecord;
 import com.study.bookluck.service.BookService;
+import com.study.bookluck.dto.BookDto;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -73,6 +76,75 @@ public class BookController {
         } else {
             return new ResponseEntity<>("즐겨찾기에서 삭제에 실패했거나 해당 항목이 없습니다.", HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PostMapping("/books/record")
+    public ResponseEntity<?> recordBookReading(@RequestBody Map<String, Object> payload) {
+        Integer userId; // String -> Integer로 변경
+        try {
+            // payload.get("userId")는 기본적으로 Object 타입이므로 Integer로 캐스팅
+            // JSON에서 숫자를 문자열로 보낼 수도 있으므로, String으로 받은 후 Integer.parseInt() 고려
+            Object userIdObj = payload.get("userId");
+            if (userIdObj instanceof Integer) {
+                userId = (Integer) userIdObj;
+            } else if (userIdObj instanceof String) {
+                userId = Integer.parseInt((String) userIdObj);
+            } else {
+                return new ResponseEntity<>("userId 형식이 올바르지 않습니다. (정수 형식)", HttpStatus.BAD_REQUEST);
+            }
+        } catch (NumberFormatException e) {
+            return new ResponseEntity<>("userId를 정수형으로 변환할 수 없습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        String status = (String) payload.get("status"); // status 추가
+        String bookId = (String) payload.get("bookId");
+        Integer duration = (Integer) payload.get("duration");
+        String endDateStr = (String) payload.get("endDate");
+        String review = (String) payload.get("review"); // review 추가
+
+        // 필수 파라미터 검사 (status는 항상 필수)
+        if (userId == null || status == null || bookId == null) {
+            return new ResponseEntity<>("필수 파라미터(userId, status, bookId)가 누락되었습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        LocalDate endDate = null;
+        // status가 'FINISHED'일 경우 duration과 endDate는 필수로 간주
+        if ("FINISHED".equalsIgnoreCase(status)) {
+            if (duration == null || endDateStr == null) {
+                return new ResponseEntity<>("완독 상태(FINISHED)의 경우 duration과 endDate는 필수입니다.", HttpStatus.BAD_REQUEST);
+            }
+            try {
+                endDate = LocalDate.parse(endDateStr); // 문자열을 LocalDate로 파싱
+            } catch (Exception e) {
+                return new ResponseEntity<>("endDate 형식이 올바르지 않습니다. (YYYY-MM-DD 형식)", HttpStatus.BAD_REQUEST);
+            }
+        }
+        // status가 'READING' 또는 'DROPPED'일 경우 duration, endDate, review는 선택 사항
+        // 이 경우 null로 넘겨도 됨.
+
+        boolean isSuccess = bookService.addBookRecord(userId, status, bookId, duration, endDate, review);
+
+        if (isSuccess) {
+            return new ResponseEntity<>("책 읽기 기록이 성공적으로 추가되었습니다.", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("책 읽기 기록 추가에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // 추가 기능: 특정 사용자의 모든 책 기록 조회
+    @GetMapping("/users/{userNo}/records") // userId -> userNo
+    public ResponseEntity<List<BookRecord>> getUserBookRecords(@PathVariable("userId") Integer userId) {
+        List<BookRecord> records = bookService.getUserBookRecords(userId);
+        return ResponseEntity.ok(records);
+    }
+
+    @GetMapping("/users/{userId}/favorites/details")
+    public ResponseEntity<List<BookDto>> getUserFavoriteBooksDetails(@PathVariable("userId") Integer userId) {
+        List<BookDto> favoriteBooks = bookService.getUserFavoriteBooksDetails(userId);
+        if (favoriteBooks.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(favoriteBooks, HttpStatus.OK);
     }
 }
 
