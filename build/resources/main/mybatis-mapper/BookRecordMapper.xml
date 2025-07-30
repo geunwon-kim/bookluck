@@ -17,8 +17,7 @@
             book_id AS bookId,
             end_date AS endDate,
             duration,
-            review,
-            record_at AS recordAt
+            review
         FROM
             book_record
         WHERE
@@ -33,8 +32,7 @@
             book_id AS bookId,
             end_date AS endDate,
             duration,
-            review,
-            record_at AS recordAt
+            review
         FROM
             book_record
         WHERE

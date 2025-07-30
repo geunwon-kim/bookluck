@@ -131,8 +131,7 @@ public class BookController {
         }
     }
 
-    // 추가 기능: 특정 사용자의 모든 책 기록 조회
-    @GetMapping("/users/{userNo}/records") // userId -> userNo
+    @GetMapping("/users/{userId}/records") // "userNo" -> "userId"로 변경
     public ResponseEntity<List<BookRecord>> getUserBookRecords(@PathVariable("userId") Integer userId) {
         List<BookRecord> records = bookService.getUserBookRecords(userId);
         return ResponseEntity.ok(records);
