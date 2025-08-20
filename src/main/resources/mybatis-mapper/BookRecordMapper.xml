@@ -11,49 +11,65 @@
 
     <select id="findByUserId" resultType="com.study.bookluck.entity.BookRecord">
         SELECT
-            id,
-            user_id AS userId,
-            status,
-            book_id AS bookId,
-            end_date AS endDate,
-            duration,
-            review
+            br.id,
+            br.user_id AS userId,
+            br.status,
+            br.book_id AS bookId,
+            br.end_date AS endDate,
+            br.duration,
+            br.review,
+            bl.title,
+            bl.image,
+            bl.author
         FROM
-            book_record
+            book_record br
+        LEFT JOIN
+            book_list bl ON br.book_id = bl.isbn
         WHERE
-            user_id = #{userId}
+            br.user_id = #{userId}
     </select>
 
     <select id="findByBookId" resultType="com.study.bookluck.entity.BookRecord">
         SELECT
-            id,
-            user_id AS userId,
-            status,
-            book_id AS bookId,
-            end_date AS endDate,
-            duration,
-            review
+            br.id,
+            br.user_id AS userId,
+            br.status,
+            br.book_id AS bookId,
+            br.end_date AS endDate,
+            br.duration,
+            br.review,
+            bl.title,
+            bl.image,
+            bl.author
         FROM
-            book_record
+            book_record br
+        LEFT JOIN
+            book_list bl ON br.book_id = bl.isbn
         WHERE
-            book_id = #{bookId}
+            br.book_id = #{bookId}
     </select>
 
     <select id="findByUserIdAndBookId" resultType="com.study.bookluck.entity.BookRecord">
         SELECT
-            id,
-            user_id AS userId,
-            status,
-            book_id AS bookId,
-            end_date AS endDate,
-            duration,
-            review,
-            record_at AS recordAt
+            br.id,
+            br.user_id AS userId,
+            br.status,
+            br.book_id AS bookId,
+            br.end_date AS endDate,
+            br.duration,
+            br.review,
+            br.record_at AS recordAt,
+            bl.title,
+            bl.image,
+            bl.author
         FROM
-            book_record
+            book_record br
+        LEFT JOIN
+            book_list bl ON br.book_id = bl.isbn
         WHERE
-            user_id = #{userId} AND book_id = #{bookId}
+            br.user_id = #{userId} AND br.book_id = #{bookId}
     </select>
+
 
     <delete id="deleteBookRecord">
         DELETE FROM book_record

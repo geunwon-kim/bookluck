@@ -29,4 +29,7 @@ public class BookRecord {
     private long isbn;
     private int duration;
     private String review;
+    private String title;
+    private String image;
+    private String author;
 }

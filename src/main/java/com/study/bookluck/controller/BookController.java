@@ -131,7 +131,7 @@ public class BookController {
         }
     }
 
-    @GetMapping("/users/{userId}/records") // "userNo" -> "userId"로 변경
+    @GetMapping("/users/{userId}/records")
     public ResponseEntity<List<BookRecord>> getUserBookRecords(@PathVariable("userId") Integer userId) {
         List<BookRecord> records = bookService.getUserBookRecords(userId);
         return ResponseEntity.ok(records);
