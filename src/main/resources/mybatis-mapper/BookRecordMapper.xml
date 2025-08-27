@@ -15,6 +15,12 @@
         AND user_id = #{userId}
     </delete>
 
+    <update id="updateBookReview">
+        UPDATE book_record
+        SET review = #{review}
+        WHERE id = #{recordId} AND user_id = #{userId}
+    </update>
+
     <select id="findByUserId" resultType="com.study.bookluck.entity.BookRecord">
         SELECT
             br.id,

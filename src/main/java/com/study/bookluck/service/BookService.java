@@ -272,6 +272,10 @@ public class BookService {
         return bookRecordMapper.deleteBookRecord(id, userId) > 0;
     }
 
+    public void updateBookReview(Integer userId, Long recordId, String review) {
+        bookRecordMapper.updateBookReview(userId, recordId, review);
+    }
+
     // 특정 사용자의 모든 책 기록 조회 (추가 기능)
     public List<BookRecord> getUserBookRecords(Integer userId, String status) {
         if (status == null || status.isEmpty()) {

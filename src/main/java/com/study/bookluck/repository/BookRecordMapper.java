@@ -14,6 +14,7 @@ import java.util.List;
 public interface BookRecordMapper {
     void insertBookRecord(BookRecord bookRecord);
     int deleteBookRecord(@Param("id") Long id, @Param("userId") Integer userId);
+    void updateBookReview(@Param("userId") Integer userId,@Param("recordId") Long recordId,@Param("review") String review);
 
     List<BookRecord> findByUserId(@Param("userId") Integer userId);
     List<BookRecord> findByUserIdAndStatus(@Param("userId") Integer userId, @Param("status") String status);

@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -145,6 +146,13 @@ public class BookController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Book record not found or not owned by user.");
         }
+    }
+
+    @PatchMapping("/users/{userId}/records/{recordId}/review")
+    public ResponseEntity<Void> updateBookReview(@PathVariable("userId") Integer userId, @PathVariable("recordId") Long recordId, @RequestBody Map<String, String> request) {
+        String review = request.get("review");
+        bookService.updateBookReview(userId, recordId, review);
+        return ResponseEntity.noContent().build(); // 204
     }
 
     @GetMapping("/users/{userId}/favorites/details")
