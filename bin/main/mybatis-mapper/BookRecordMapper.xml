@@ -29,6 +29,27 @@
             br.user_id = #{userId}
     </select>
 
+    <select id="findByUserIdAndStatus" resultType="com.study.bookluck.entity.BookRecord">
+        SELECT
+            br.id,
+            br.user_id AS userId,
+            br.status,
+            br.book_id AS bookId,
+            br.end_date AS endDate,
+            br.duration,
+            br.review,
+            bl.title,
+            bl.image,
+            bl.author
+        FROM
+            book_record br
+        LEFT JOIN
+            book_list bl ON br.book_id = bl.isbn
+        WHERE
+            br.user_id = #{userId}
+        AND br.status = #{status}
+    </select>
+
     <select id="findByBookId" resultType="com.study.bookluck.entity.BookRecord">
         SELECT
             br.id,

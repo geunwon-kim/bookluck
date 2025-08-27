@@ -14,11 +14,11 @@ import java.util.List;
 public interface BookRecordMapper {
     void insertBookRecord(BookRecord bookRecord);
 
-    List<BookRecord> findByUserId(@Param("userId") Integer userId); // String -> Integer로 변경
-
+    List<BookRecord> findByUserId(@Param("userId") Integer userId);
+    List<BookRecord> findByUserIdAndStatus(@Param("userId") Integer userId, @Param("status") String status);
     List<BookRecord> findByBookId(@Param("bookId") String bookId);
 
-    List<BookRecord> findByUserIdAndBookId(@Param("userId") Integer userId, @Param("bookId") String bookId); // String -> Integer로 변경
+    List<BookRecord> findByUserIdAndBookId(@Param("userId") Integer userId, @Param("bookId") String bookId);
 
 
     void deleteBookRecord(@Param("id") Long id);

@@ -132,8 +132,8 @@ public class BookController {
     }
 
     @GetMapping("/users/{userId}/records")
-    public ResponseEntity<List<BookRecord>> getUserBookRecords(@PathVariable("userId") Integer userId) {
-        List<BookRecord> records = bookService.getUserBookRecords(userId);
+    public ResponseEntity<List<BookRecord>> getUserBookRecords(@PathVariable("userId") Integer userId, @RequestParam(value = "status", required = false) String status) {
+        List<BookRecord> records = bookService.getUserBookRecords(userId, status);
         return ResponseEntity.ok(records);
     }
 

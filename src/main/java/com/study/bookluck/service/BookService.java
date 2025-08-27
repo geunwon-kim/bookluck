@@ -268,8 +268,12 @@ public class BookService {
     }
 
     // 특정 사용자의 모든 책 기록 조회 (추가 기능)
-    public List<BookRecord> getUserBookRecords(Integer userId) {
-        return bookRecordMapper.findByUserId(userId);
+    public List<BookRecord> getUserBookRecords(Integer userId, String status) {
+        if (status == null || status.isEmpty()) {
+            return bookRecordMapper.findByUserId(userId);
+        } else {
+            return bookRecordMapper.findByUserIdAndStatus(userId, status);
+        }
     }
 
     public List<BookDto> getUserFavoriteBooksDetails(Integer userId) {
@@ -278,13 +282,6 @@ public class BookService {
         return favoriteBooks.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
-
-        // Spring Data JPA 사용 시 (위의 FavoriteBookRepository 참고)
-        /*
-        return favoriteBookRepository.findFavoriteBooksDetailsByUserId(userId).stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-        */
     }
 
     private BookDto convertToDto(Book book) {
