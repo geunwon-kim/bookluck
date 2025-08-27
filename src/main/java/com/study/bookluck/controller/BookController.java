@@ -137,6 +137,16 @@ public class BookController {
         return ResponseEntity.ok(records);
     }
 
+    @DeleteMapping("/users/{userId}/records/{id}")
+    public ResponseEntity<String> deleteBookRecord(@PathVariable("userId") Integer userId,@PathVariable("id") Long id) {
+        boolean deleted = bookService.deleteBookRecord(id, userId);
+        if (deleted) {
+            return ResponseEntity.ok("Book record deleted successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Book record not found or not owned by user.");
+        }
+    }
+
     @GetMapping("/users/{userId}/favorites/details")
     public ResponseEntity<List<BookDto>> getUserFavoriteBooksDetails(@PathVariable("userId") Integer userId) {
         List<BookDto> favoriteBooks = bookService.getUserFavoriteBooksDetails(userId);
@@ -145,5 +155,7 @@ public class BookController {
         }
         return new ResponseEntity<>(favoriteBooks, HttpStatus.OK);
     }
+
+
 }
 

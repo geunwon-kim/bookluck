@@ -13,6 +13,7 @@ import java.util.List;
 @Mapper
 public interface BookRecordMapper {
     void insertBookRecord(BookRecord bookRecord);
+    int deleteBookRecord(@Param("id") Long id, @Param("userId") Integer userId);
 
     List<BookRecord> findByUserId(@Param("userId") Integer userId);
     List<BookRecord> findByUserIdAndStatus(@Param("userId") Integer userId, @Param("status") String status);
@@ -21,5 +22,5 @@ public interface BookRecordMapper {
     List<BookRecord> findByUserIdAndBookId(@Param("userId") Integer userId, @Param("bookId") String bookId);
 
 
-    void deleteBookRecord(@Param("id") Long id);
+    // void deleteBookRecord(@Param("id") Long id);
 }

@@ -22,6 +22,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)  // JSON의 알 수 없는 필드 무시
 public class BookRecord {
+    private Integer id;
     private Integer userId;
     private String status;
     private String bookId;

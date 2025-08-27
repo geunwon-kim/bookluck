@@ -9,6 +9,12 @@
         VALUES (#{userId}, #{status}, #{bookId}, #{endDate}, #{duration}, #{review})
     </insert>
 
+    <delete id="deleteBookRecord">
+        DELETE FROM book_record
+        WHERE id = #{id}
+        AND user_id = #{userId}
+    </delete>
+
     <select id="findByUserId" resultType="com.study.bookluck.entity.BookRecord">
         SELECT
             br.id,
@@ -90,11 +96,5 @@
         WHERE
             br.user_id = #{userId} AND br.book_id = #{bookId}
     </select>
-
-
-    <delete id="deleteBookRecord">
-        DELETE FROM book_record
-        WHERE id = #{id}
-    </delete>
 
 </mapper>

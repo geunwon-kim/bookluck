@@ -267,6 +267,11 @@ public class BookService {
         return true; // 성공적으로 기록
     }
 
+    @Transactional
+    public boolean deleteBookRecord(Long id, Integer userId) {
+        return bookRecordMapper.deleteBookRecord(id, userId) > 0;
+    }
+
     // 특정 사용자의 모든 책 기록 조회 (추가 기능)
     public List<BookRecord> getUserBookRecords(Integer userId, String status) {
         if (status == null || status.isEmpty()) {
