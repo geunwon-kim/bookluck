@@ -26,7 +26,7 @@ public class BookRecord {
     private Integer userId;
     private String status;
     private String bookId;
-    private LocalDate endDate;
+    private String endDate;
     private long isbn;
     private int duration;
     private String review;

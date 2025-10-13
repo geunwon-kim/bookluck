@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.study.bookluck.BookluckApplicationTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-08-27T08:35:09" hostname="MacBook-Pro-3.local" time="0.484">
+<testsuite name="com.study.bookluck.BookluckApplicationTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-10-13T09:05:17" hostname="MacBook-Pro-3.local" time="0.434">
   <properties/>
-  <testcase name="contextLoads()" classname="com.study.bookluck.BookluckApplicationTests" time="0.484"/>
-  <system-out><![CDATA[17:35:08.390 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.study.bookluck.BookluckApplicationTests]: BookluckApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-17:35:08.441 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.study.bookluck.BookluckApplication for test class com.study.bookluck.BookluckApplicationTests
+  <testcase name="contextLoads()" classname="com.study.bookluck.BookluckApplicationTests" time="0.434"/>
+  <system-out><![CDATA[18:05:16.407 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.study.bookluck.BookluckApplicationTests]: BookluckApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+18:05:16.457 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.study.bookluck.BookluckApplication for test class com.study.bookluck.BookluckApplicationTests
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -14,9 +14,9 @@
 
  :: Spring Boot ::                (v3.3.7)
 
-2025-08-27T17:35:08.620+09:00  INFO 77031 --- [bookluck] [    Test worker] c.s.bookluck.BookluckApplicationTests    : Starting BookluckApplicationTests using Java 17.0.6 with PID 77031 (started by admin in /Users/admin/Documents/java/bookluck)
-2025-08-27T17:35:08.621+09:00  INFO 77031 --- [bookluck] [    Test worker] c.s.bookluck.BookluckApplicationTests    : No active profile set, falling back to 1 default profile: "default"
-2025-08-27T17:35:09.435+09:00  INFO 77031 --- [bookluck] [    Test worker] c.s.bookluck.BookluckApplicationTests    : Started BookluckApplicationTests in 0.916 seconds (process running for 1.578)
+2025-10-13T18:05:16.625+09:00  INFO 15652 --- [bookluck] [    Test worker] c.s.bookluck.BookluckApplicationTests    : Starting BookluckApplicationTests using Java 17.0.6 with PID 15652 (started by admin in /Users/admin/Documents/java/bookluck)
+2025-10-13T18:05:16.626+09:00  INFO 15652 --- [bookluck] [    Test worker] c.s.bookluck.BookluckApplicationTests    : No active profile set, falling back to 1 default profile: "default"
+2025-10-13T18:05:17.417+09:00  INFO 15652 --- [bookluck] [    Test worker] c.s.bookluck.BookluckApplicationTests    : Started BookluckApplicationTests in 0.89 seconds (process running for 1.422)
 ]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

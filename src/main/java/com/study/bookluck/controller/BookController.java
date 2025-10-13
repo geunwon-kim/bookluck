@@ -1,7 +1,7 @@
 package com.study.bookluck.controller;
 
 import com.study.bookluck.entity.BookRecord;
-import com.study.bookluck.service.BookService;
+import com.study.bookluck.service.*;
 import com.study.bookluck.dto.BookDto;
 
 import lombok.RequiredArgsConstructor;
@@ -77,6 +77,7 @@ public class BookController {
         } else {
             return new ResponseEntity<>("즐겨찾기에서 삭제에 실패했거나 해당 항목이 없습니다.", HttpStatus.NOT_FOUND);
         }
+
     }
 
     @PostMapping("/books/record")
@@ -100,7 +101,7 @@ public class BookController {
         String status = (String) payload.get("status"); // status 추가
         String bookId = (String) payload.get("bookId");
         Integer duration = (Integer) payload.get("duration");
-        String endDateStr = (String) payload.get("endDate");
+        String endDate = (String) payload.get("endDate");
         String review = (String) payload.get("review"); // review 추가
 
         // 필수 파라미터 검사 (status는 항상 필수)
@@ -108,16 +109,10 @@ public class BookController {
             return new ResponseEntity<>("필수 파라미터(userId, status, bookId)가 누락되었습니다.", HttpStatus.BAD_REQUEST);
         }
 
-        LocalDate endDate = null;
         // status가 'FINISHED'일 경우 duration과 endDate는 필수로 간주
         if ("FINISHED".equalsIgnoreCase(status)) {
-            if (duration == null || endDateStr == null) {
+            if (duration == null || endDate == null) {
                 return new ResponseEntity<>("완독 상태(FINISHED)의 경우 duration과 endDate는 필수입니다.", HttpStatus.BAD_REQUEST);
-            }
-            try {
-                endDate = LocalDate.parse(endDateStr); // 문자열을 LocalDate로 파싱
-            } catch (Exception e) {
-                return new ResponseEntity<>("endDate 형식이 올바르지 않습니다. (YYYY-MM-DD 형식)", HttpStatus.BAD_REQUEST);
             }
         }
         // status가 'READING' 또는 'DROPPED'일 경우 duration, endDate, review는 선택 사항

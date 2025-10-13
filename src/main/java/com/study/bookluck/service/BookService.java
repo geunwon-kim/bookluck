@@ -7,6 +7,7 @@ import com.study.bookluck.entity.*;
 import com.study.bookluck.repository.BookMapper;
 import com.study.bookluck.repository.BookRecordMapper;
 import com.study.bookluck.repository.FavoriteBookMapper;
+import com.study.bookluck.repository.ReceiptMapper;
 import com.study.bookluck.dto.BookDto;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,8 @@ public class BookService {
     private final BookMapper bookMapper;
     private final BookRecordMapper bookRecordMapper;
     private final FavoriteBookMapper favoriteBookMapper;
+    private final ChatGptService chatGptService;
+    private final ReceiptMapper receiptMapper;
 
     // 네이버 도서 검색 api key
     private final String CLIENT_ID = "LyhjhAt1_1TNffOFXhE2";
@@ -130,7 +133,7 @@ public class BookService {
                 });
             }
         }
-    
+
         // DB 저장
         try {
             if (!books.isEmpty()) {
@@ -142,10 +145,10 @@ public class BookService {
         } catch (Exception e) {
             System.out.println("Error saving books: " + e.getMessage());
         }
-    
+
         return books;
     }
-    
+
 
     private String extractMainCategory(String categoryName) {
         if (categoryName == null || categoryName.isEmpty()) {
@@ -165,11 +168,11 @@ public class BookService {
         String apiKey = "ttbbookluck.team0025001";
         int start = 1;
         int maxResults = 100;
-    
+
         try {
             RestTemplate restTemplate = new RestTemplate();
             ObjectMapper om = new ObjectMapper();
-    
+
             while (true) {
                 URI url = UriComponentsBuilder
                         .fromUriString("https://www.aladin.co.kr/ttb/api/ItemSearch.aspx")
@@ -184,39 +187,39 @@ public class BookService {
                         .encode()
                         .build()
                         .toUri();
-    
+
                 ResponseEntity<String> resp = restTemplate.getForEntity(url, String.class);
                 AladinResult result = om.readValue(resp.getBody(), AladinResult.class);
-    
+
                 if (result.getItem() == null || result.getItem().isEmpty()) {
                     break;
                 }
-    
+
                 allItems.addAll(result.getItem());
-    
+
                 // 마지막 페이지라면 중단
                 if (result.getItem().size() < maxResults) {
                     break;
                 }
-    
+
                 start += maxResults;
-    
+
                 // 너무 많이 불러오는 걸 방지 (예: 최대 1000권)
                 if (start > 1000) break;
-    
+
                 // 호출 간 간격을 줄 수도 있음 (예: Thread.sleep(100))
             }
-    
+
             System.out.println("총 알라딘 검색 결과 수: " + allItems.size());
             return allItems;
-    
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-    
+
         return new ArrayList<>();
     }
-    
+
 
     @Transactional
     public boolean addBookToFavorites(String userId, String bookId) {
@@ -251,7 +254,7 @@ public class BookService {
     }
 
     @Transactional
-    public boolean addBookRecord(Integer userId, String status, String bookId, Integer duration, LocalDate endDate, String review) {
+    public boolean addBookRecord(Integer userId, String status, String bookId, Integer duration, String endDate, String review) {
 
         BookRecord bookRecord = BookRecord.builder()
                 .userId(userId)
@@ -263,6 +266,48 @@ public class BookService {
                 .build();
 
         bookRecordMapper.insertBookRecord(bookRecord);
+
+        // ✅ status가 FINISHED라면 receipt 생성 로직 실행
+        if ("FINISHED".equalsIgnoreCase(status)) {
+            List<BookRecord> pastReviews = bookRecordMapper.findByUserAndBookId(userId, bookId);
+            // System.out.println(pastReviews);
+
+            // 모든 리뷰 텍스트 합치기
+            String combinedReview = pastReviews.stream()
+                    .map(BookRecord::getReview)
+                    .filter(r -> r != null && !r.isEmpty())
+                    .collect(Collectors.joining(" "));
+
+            // 모든 기록의 duration 합산
+            int totalDuration = pastReviews.stream()
+                    .mapToInt(BookRecord::getDuration)
+                    .sum();
+
+            // Optional을 사용해 첫 번째 요소와 endDate를 안전하게 가져옴
+            String startDate = pastReviews.stream()
+                    .findFirst()
+                    .map(BookRecord::getEndDate)
+                    .orElse(null); // endDate가 없으면 null 반환
+
+            // System.out.println(pastReviews.stream().findFirst());
+            System.out.println("계산된 startDate 값: " + startDate);
+
+
+            // 요약 생성
+            String summary = chatGptService.summarizeReview(combinedReview);
+
+            // receipt 저장
+            Receipt receipt = Receipt.builder()
+                    .userId(userId)
+                    .bookId(bookId)
+                    .startDate(startDate)
+                    .endDate(endDate)
+                    .duration(totalDuration)
+                    .review(summary)
+                    .build();
+
+            receiptMapper.insertReceipt(receipt);
+        }
 
         return true; // 성공적으로 기록
     }

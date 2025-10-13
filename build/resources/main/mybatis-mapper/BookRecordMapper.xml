@@ -5,29 +5,29 @@
 <mapper namespace="com.study.bookluck.repository.BookRecordMapper">
 
     <insert id="insertBookRecord">
-        INSERT INTO book_record (user_id, status, book_id, end_date, duration, review)
+        INSERT INTO book_record (userId, status, bookId, endDate, duration, review)
         VALUES (#{userId}, #{status}, #{bookId}, #{endDate}, #{duration}, #{review})
     </insert>
 
     <delete id="deleteBookRecord">
         DELETE FROM book_record
         WHERE id = #{id}
-        AND user_id = #{userId}
+        AND userId = #{userId}
     </delete>
 
     <update id="updateBookReview">
         UPDATE book_record
         SET review = #{review}
-        WHERE id = #{recordId} AND user_id = #{userId}
+        WHERE id = #{recordId} AND userId = #{userId}
     </update>
 
     <select id="findByUserId" resultType="com.study.bookluck.entity.BookRecord">
         SELECT
             br.id,
-            br.user_id AS userId,
+            br.userId,
             br.status,
-            br.book_id AS bookId,
-            br.end_date AS endDate,
+            br.bookId,
+            br.endDate,
             br.duration,
             br.review,
             bl.title,
@@ -36,18 +36,18 @@
         FROM
             book_record br
         LEFT JOIN
-            book_list bl ON br.book_id = bl.isbn
+            book_list bl ON br.bookId = bl.isbn
         WHERE
-            br.user_id = #{userId}
+            br.userId = #{userId}
     </select>
 
     <select id="findByUserIdAndStatus" resultType="com.study.bookluck.entity.BookRecord">
         SELECT
             br.id,
-            br.user_id AS userId,
+            br.userId,
             br.status,
-            br.book_id AS bookId,
-            br.end_date AS endDate,
+            br.bookId,
+            br.endDate,
             br.duration,
             br.review,
             bl.title,
@@ -56,19 +56,19 @@
         FROM
             book_record br
         LEFT JOIN
-            book_list bl ON br.book_id = bl.isbn
+            book_list bl ON br.bookId = bl.isbn
         WHERE
-            br.user_id = #{userId}
+            br.userId = #{userId}
         AND br.status = #{status}
     </select>
 
     <select id="findByBookId" resultType="com.study.bookluck.entity.BookRecord">
         SELECT
             br.id,
-            br.user_id AS userId,
+            br.userId AS userId,
             br.status,
-            br.book_id AS bookId,
-            br.end_date AS endDate,
+            br.bookId AS bookId,
+            br.endDate AS endDate,
             br.duration,
             br.review,
             bl.title,
@@ -77,18 +77,18 @@
         FROM
             book_record br
         LEFT JOIN
-            book_list bl ON br.book_id = bl.isbn
+            book_list bl ON br.bookId = bl.isbn
         WHERE
-            br.book_id = #{bookId}
+            br.bookId = #{bookId}
     </select>
 
     <select id="findByUserIdAndBookId" resultType="com.study.bookluck.entity.BookRecord">
         SELECT
             br.id,
-            br.user_id AS userId,
+            br.userId,
             br.status,
-            br.book_id AS bookId,
-            br.end_date AS endDate,
+            br.bookId,
+            br.endDate,
             br.duration,
             br.review,
             br.record_at AS recordAt,
@@ -98,9 +98,15 @@
         FROM
             book_record br
         LEFT JOIN
-            book_list bl ON br.book_id = bl.isbn
+            book_list bl ON br.bookId = bl.isbn
         WHERE
-            br.user_id = #{userId} AND br.book_id = #{bookId}
+            br.userId = #{userId} AND br.bookId = #{bookId}
+    </select>
+
+    <select id="findByUserAndBookId" resultType="com.study.bookluck.entity.BookRecord">
+        SELECT * FROM book_record
+        WHERE userId = #{userId} AND bookId = #{bookId}
+        ORDER BY endDate ASC
     </select>
 
 </mapper>
