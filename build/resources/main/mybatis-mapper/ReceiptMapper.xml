@@ -9,9 +9,31 @@
             VALUES (#{userId}, #{bookId}, #{startDate}, #{endDate}, #{duration}, #{review})
     </insert>
 
-    <select id="findByUserId" resultType="com.study.bookluck.entity.Receipt">
+    <!-- <select id="findByUserId" resultType="com.study.bookluck.entity.Receipt">
         SELECT * FROM receipt
         WHERE userId = #{userId}
+    </select> -->
+
+    <select id="findByUserId" resultType="com.study.bookluck.entity.Receipt">
+        SELECT
+            r.id,
+            r.userId,
+            r.bookId,
+            r.startDate,
+            r.endDate,
+            r.duration,
+            r.review,
+            bl.title,
+            bl.author
+        FROM
+            receipt r
+        LEFT JOIN
+            book_list bl
+        ON
+            r.bookId = bl.isbn
+        WHERE
+            r.userId = #{userId}
     </select>
+
 
 </mapper>
