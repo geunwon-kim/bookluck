@@ -23,6 +23,7 @@ public interface BookRecordMapper {
     List<BookRecord> findByUserIdAndBookId(@Param("userId") Integer userId, @Param("bookId") String bookId);
     List<BookRecord> findByUserAndBookId(@Param("userId") Integer userId, @Param("bookId") String bookId);
 
+    List<BookRecord> findRecordsByUserIdAndYear(@Param("userId") Integer userId, @Param("year") Integer year);
 
 
     // void deleteBookRecord(@Param("id") Long id);

@@ -109,4 +109,19 @@
         ORDER BY endDate ASC
     </select>
 
+    <select id="findRecordsByUserIdAndYear" resultType="com.study.bookluck.entity.BookRecord">
+        SELECT
+            id,
+            userId,
+            bookId,
+            status,
+            duration,
+            review,
+            endDate
+        FROM book_record
+        WHERE userId = #{userId}
+        AND YEAR(endDate) = #{year}
+    </select>
+
+
 </mapper>

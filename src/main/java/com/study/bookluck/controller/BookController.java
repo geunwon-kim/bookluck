@@ -3,6 +3,7 @@ package com.study.bookluck.controller;
 import com.study.bookluck.entity.BookRecord;
 import com.study.bookluck.service.*;
 import com.study.bookluck.dto.BookDto;
+import com.study.bookluck.dto.ReadingStatsDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -158,6 +159,13 @@ public class BookController {
         }
         return new ResponseEntity<>(favoriteBooks, HttpStatus.OK);
     }
+
+    @GetMapping("/users/{userId}/records/stats")
+    public ResponseEntity<ReadingStatsDto> getReadingStats(@PathVariable("userId") Integer userId, @RequestParam(value = "year") Integer year) {
+        ReadingStatsDto stats = bookService.getReadingStats(userId, year);
+        return ResponseEntity.ok(stats);
+    }
+
 
 
 }

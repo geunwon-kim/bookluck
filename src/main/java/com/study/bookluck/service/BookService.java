@@ -9,6 +9,7 @@ import com.study.bookluck.repository.BookRecordMapper;
 import com.study.bookluck.repository.FavoriteBookMapper;
 import com.study.bookluck.repository.ReceiptMapper;
 import com.study.bookluck.dto.BookDto;
+import com.study.bookluck.dto.ReadingStatsDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +28,9 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
  
@@ -355,5 +358,44 @@ public class BookService {
                 .category2(book.getCategory2())
                 .build();
     }
+
+    public ReadingStatsDto getReadingStats(Integer userId, Integer year) {
+
+        // 1. 데이터 조회
+        List<BookRecord> records = bookRecordMapper.findRecordsByUserIdAndYear(userId, year);
+
+        // 2. 월별 초기값 생성 (1~12월 모두 0)
+        Map<Integer, Integer> monthMap = new HashMap<>();
+        for (int i = 1; i <= 12; i++) {
+            monthMap.put(i, 0);
+        }
+
+        // 3. 월별 duration 합산
+        for (BookRecord br : records) {
+            LocalDate end = LocalDate.parse(br.getEndDate());  // "2025-03-12" 같은 형태일 경우
+            int month = end.getMonthValue();  // 3
+
+            monthMap.put(month, monthMap.get(month) + br.getDuration());
+        }
+
+        // 4. total minutes
+        int totalMinutes = monthMap.values().stream().mapToInt(v -> v).sum();
+
+        // 5. DTO 변환
+        List<ReadingStatsDto.MonthData> monthDataList = monthMap.entrySet().stream()
+            .sorted(Map.Entry.comparingByKey())
+            .map(entry -> ReadingStatsDto.MonthData.builder()
+                    .month(String.valueOf(entry.getKey()))
+                    .minutes(entry.getValue())
+                    .build()
+            ).toList();
+
+        return ReadingStatsDto.builder()
+                .year(year)
+                .readingMinutes(totalMinutes)
+                .data(monthDataList)
+                .build();
+    }
+
 
 }
