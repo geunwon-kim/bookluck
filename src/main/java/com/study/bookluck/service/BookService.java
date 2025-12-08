@@ -8,8 +8,7 @@ import com.study.bookluck.repository.BookMapper;
 import com.study.bookluck.repository.BookRecordMapper;
 import com.study.bookluck.repository.FavoriteBookMapper;
 import com.study.bookluck.repository.ReceiptMapper;
-import com.study.bookluck.dto.BookDto;
-import com.study.bookluck.dto.ReadingStatsDto;
+import com.study.bookluck.dto.*;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,8 +26,10 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -395,6 +396,40 @@ public class BookService {
                 .readingMinutes(totalMinutes)
                 .data(monthDataList)
                 .build();
+    }
+
+    public List<ReadingTimeResponse> getWeeklyReadingTime(Integer userId) {
+
+        List<BookRecord> records = bookRecordMapper.findLast7DaysRecords(userId);
+
+        Map<String, Double> dayToHours = new LinkedHashMap<>();
+
+        // 최근 7일 날짜 초기값 생성
+        for (int i = 6; i >= 0; i--) {
+            LocalDate day = LocalDate.now().minusDays(i);
+            String key = day.format(DateTimeFormatter.ofPattern("MM.dd"));
+            dayToHours.put(key, 0.0);
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        for (BookRecord br : records) {
+
+            LocalDate date = LocalDate.parse(br.getEndDate(), formatter);
+            String key = date.format(DateTimeFormatter.ofPattern("MM.dd"));
+
+            double hours = br.getDuration() / 60.0;
+
+            dayToHours.put(key, dayToHours.getOrDefault(key, 0.0) + hours);
+        }
+
+        List<ReadingTimeResponse> result = new ArrayList<>();
+
+        dayToHours.forEach((date, hours) ->
+                result.add(new ReadingTimeResponse(date, Math.round(hours * 10) / 10.0))
+        );
+
+        return result;
     }
 
 

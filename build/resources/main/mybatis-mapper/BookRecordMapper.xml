@@ -123,5 +123,18 @@
         AND YEAR(endDate) = #{year}
     </select>
 
+    <select id="findLast7DaysRecords" resultType="com.study.bookluck.entity.BookRecord">
+        SELECT 
+            id,
+            userId,
+            status,
+            bookId,
+            endDate,
+            duration,
+            review
+        FROM book_record
+        WHERE userId = #{userId}
+        AND endDate BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE()
+    </select>
 
 </mapper>
