@@ -1,7 +1,8 @@
 package com.study.bookluck.controller;
 
-import com.study.bookluck.entity.Receipt;
+import com.study.bookluck.entity.*;
 import com.study.bookluck.service.*;
+import com.study.bookluck.dto.*;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -28,6 +29,11 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<List<Receipt>> getReceiptsByUserId(@PathVariable("userId") Integer userId) {
         return ResponseEntity.ok(receiptService.getReceiptsByUserId(userId));
+    }
+
+    @GetMapping("/users/{userId}/badges")
+    public List<BadgeResponse> getUserBadges(@PathVariable("userId") Integer userId) {
+        return userService.getBadgeData(userId);
     }
 
 }

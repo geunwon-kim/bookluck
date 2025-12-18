@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.study.bookluck.repository.BadgeMapper">
+
+    <select id="findAllBadges" resultType="com.study.bookluck.entity.Badge">
+        SELECT * FROM badge
+    </select>
+
+    <resultMap id="UserBadgeMap" type="com.study.bookluck.entity.UserBadge">
+        <result property="userId" column="userId"/>
+        <result property="badgeId" column="badgeId"/>
+        <result property="active" column="active"/>
+        <result property="title" column="title"/>
+    </resultMap>
+
+    <select id="findUserBadges" resultMap="UserBadgeMap">
+        SELECT 
+            ub.userId AS userId,
+            ub.badgeId AS badgeId,
+            ub.active AS active,
+            b.title AS title
+        FROM badge b
+        LEFT JOIN user_badge ub 
+            ON b.id = ub.badgeId AND ub.userId = #{userId}
+    </select>
+
+    <select id="countUserBadge" resultType="int">
+        SELECT COUNT(*)
+        FROM user_badge
+        WHERE userId = #{userId}
+        AND badgeId = #{badgeId}
+    </select>
+
+    <insert id="insertUserBadge">
+        INSERT INTO user_badge (userId, badgeId)
+        VALUES (#{userId}, #{badgeId})
+    </insert>
+
+
+
+</mapper>

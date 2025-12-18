@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.study.bookluck.entity.*;
-import com.study.bookluck.repository.BookMapper;
-import com.study.bookluck.repository.BookRecordMapper;
-import com.study.bookluck.repository.FavoriteBookMapper;
-import com.study.bookluck.repository.ReceiptMapper;
+import com.study.bookluck.repository.*;
 import com.study.bookluck.dto.*;
 
 import lombok.RequiredArgsConstructor;
@@ -44,6 +41,7 @@ public class BookService {
     private final FavoriteBookMapper favoriteBookMapper;
     private final ChatGptService chatGptService;
     private final ReceiptMapper receiptMapper;
+    private final UserService userService;
 
     // 네이버 도서 검색 api key
     private final String CLIENT_ID = "LyhjhAt1_1TNffOFXhE2";
@@ -311,6 +309,8 @@ public class BookService {
                     .build();
 
             receiptMapper.insertReceipt(receipt);
+
+            userService.checkBadge(userId, 1);
         }
 
         return true; // 성공적으로 기록
@@ -431,6 +431,8 @@ public class BookService {
 
         return result;
     }
+
+    
 
 
 }
