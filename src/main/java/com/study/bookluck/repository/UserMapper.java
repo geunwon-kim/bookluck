@@ -10,4 +10,8 @@ import java.util.List;
 @Mapper
 public interface UserMapper {
     List<User> findAll();
+    User findByEmail(String email);
+    User findByGoogleId(String googleId);
+    void insert(User user);
+    void update(User user);
 }

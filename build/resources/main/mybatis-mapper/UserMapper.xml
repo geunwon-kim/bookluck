@@ -7,5 +7,29 @@
     <select id="findAll" resultType="com.study.bookluck.entity.User">
         SELECT * FROM users
     </select>
+
+    <select id="findByEmail" resultType="com.study.bookluck.entity.User">
+        SELECT * FROM users WHERE email = #{email}
+    </select>
+
+    <select id="findByGoogleId" resultType="com.study.bookluck.entity.User">
+        SELECT * FROM users WHERE google_id = #{googleId}
+    </select>
+
+    <insert id="insert" parameterType="com.study.bookluck.entity.User" useGeneratedKeys="true" keyProperty="user_id">
+        INSERT INTO users (user_name, email, google_id, created_at, updated_at)
+        VALUES (#{user_name}, #{email}, #{google_id}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="com.study.bookluck.entity.User">
+        UPDATE users
+        SET user_name = #{user_name},
+            email = #{email},
+            <if test="google_id != null">
+            google_id = #{google_id},
+            </if>
+            updated_at = NOW()
+        WHERE user_id = #{user_id}
+    </update>
  
 </mapper>
