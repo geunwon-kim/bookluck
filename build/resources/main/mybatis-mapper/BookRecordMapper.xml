@@ -9,6 +9,11 @@
         VALUES (#{userId}, #{status}, #{bookId}, #{endDate}, #{duration}, #{review})
     </insert>
 
+    <insert id="insertReadingSession" parameterType="com.study.bookluck.entity.BookRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO book_record (userId, status, startDate, accumulatedDuration)
+        VALUES (#{userId}, #{status}, #{startDate}, #{accumulatedDuration})
+    </insert>
+
     <delete id="deleteBookRecord">
         DELETE FROM book_record
         WHERE id = #{id}

@@ -22,7 +22,27 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login/oauth2/**", "/oauth2/**", "/users/**", "/books/**").permitAll()
+                // 공개 API (인증 불필요)
+                .requestMatchers(
+                    "/", 
+                    "/login/oauth2/**", 
+                    "/oauth2/**", 
+                    "/login/**",
+                    "/books/getAllBooks",
+                    "/books/getApiBooks",
+                    "/books-post/getAllBooks",
+                    "/phrases/**",
+                    "/actuator/**",
+                    "/error"
+                ).permitAll()
+                // 사용자 데이터 관련 API는 인증 필요
+                .requestMatchers(
+                    "/users/**",
+                    "/books/record",
+                    "/books/addToFavorites",
+                    "/books/reading/**"
+                ).authenticated()
+                // 나머지는 인증 필요
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2

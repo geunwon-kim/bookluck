@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.study.bookluck.repository.ReadingSessionMapper">
+
+    <insert id="insertSession" parameterType="com.study.bookluck.entity.ReadingSession" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO reading_session (userId, status, startDate, accumulatedDuration)
+        VALUES (#{userId}, #{status}, #{startDate}, #{accumulatedDuration})
+    </insert>
+
+    <select id="findActiveSession" resultType="com.study.bookluck.entity.ReadingSession">
+        SELECT 
+            id,
+            userId,
+            status,
+            startDate,
+            lastPausedAt,
+            lastResumedAt,
+            accumulatedDuration,
+            endDate,
+            finalDuration
+        FROM reading_session
+        WHERE userId = #{userId}
+        AND status IN ('READING', 'PAUSED')
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+    <select id="findStoppedSession" resultType="com.study.bookluck.entity.ReadingSession">
+        SELECT 
+            id,
+            userId,
+            status,
+            startDate,
+            lastPausedAt,
+            lastResumedAt,
+            accumulatedDuration,
+            endDate,
+            finalDuration
+        FROM reading_session
+        WHERE userId = #{userId}
+        AND endDate IS NOT NULL
+        AND finalDuration IS NOT NULL
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+    <update id="updateSession" parameterType="com.study.bookluck.entity.ReadingSession">
+        UPDATE reading_session
+        SET status = #{status},
+            <if test="lastPausedAt != null">
+            lastPausedAt = #{lastPausedAt},
+            </if>
+            <if test="lastResumedAt != null">
+            lastResumedAt = #{lastResumedAt},
+            </if>
+            <if test="accumulatedDuration != null">
+            accumulatedDuration = #{accumulatedDuration},
+            </if>
+            <if test="endDate != null">
+            endDate = #{endDate},
+            </if>
+            <if test="finalDuration != null">
+            finalDuration = #{finalDuration}
+            </if>
+        WHERE id = #{id} AND userId = #{userId}
+    </update>
+
+</mapper>

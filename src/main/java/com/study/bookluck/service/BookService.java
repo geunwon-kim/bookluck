@@ -23,7 +23,9 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
 public class BookService {
     private final BookMapper bookMapper;
     private final BookRecordMapper bookRecordMapper;
+    private final ReadingSessionMapper readingSessionMapper;
     private final FavoriteBookMapper favoriteBookMapper;
     private final ChatGptService chatGptService;
     private final ReceiptMapper receiptMapper;
@@ -257,17 +260,67 @@ public class BookService {
 
     @Transactional
     public boolean addBookRecord(Integer userId, String status, String bookId, Integer duration, String endDate, String review) {
+        // 1. 활성 독서 세션이 있으면 먼저 종료
+        ReadingSession activeSession = readingSessionMapper.findActiveSession(userId);
+        ReadingSession stoppedSession = null;
+        
+        if (activeSession != null) {
+            // 활성 세션이 있으면 종료 처리
+            LocalDateTime now = LocalDateTime.now();
+            int finalDuration = activeSession.getAccumulatedDuration() != null ? activeSession.getAccumulatedDuration() : 0;
+            
+            // READING 상태였다면 마지막 재개 시간부터 현재까지의 시간 추가
+            if ("READING".equals(activeSession.getStatus())) {
+                LocalDateTime lastResumedAt = activeSession.getLastResumedAt() != null 
+                        ? activeSession.getLastResumedAt() 
+                        : activeSession.getStartDate();
+                long minutesSinceResume = ChronoUnit.MINUTES.between(lastResumedAt, now);
+                finalDuration += (int) minutesSinceResume;
+            }
+            
+            // 세션 종료 처리
+            activeSession.setEndDate(now);
+            activeSession.setFinalDuration(finalDuration);
+            activeSession.setAccumulatedDuration(finalDuration);
+            
+            readingSessionMapper.updateSession(activeSession);
+            stoppedSession = activeSession;
+        } else {
+            // 활성 세션이 없으면 이미 종료된 세션이 있는지 확인
+            stoppedSession = readingSessionMapper.findStoppedSession(userId);
+        }
+        
+        // 2. 독서 세션 데이터를 사용하여 BookRecord 생성
+        BookRecord bookRecord;
+        if (stoppedSession != null && stoppedSession.getFinalDuration() != null) {
+            // 독서 종료된 세션이 있으면 그 세션의 데이터를 사용
+            bookRecord = BookRecord.builder()
+                    .userId(userId)
+                    .status(status)
+                    .bookId(bookId)  // 필수: 독후감 작성 시 반드시 bookId 필요
+                    .duration(stoppedSession.getFinalDuration())
+                    .endDate(stoppedSession.getEndDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                    .review(review)
+                    .build();
 
-        BookRecord bookRecord = BookRecord.builder()
-                .userId(userId)
-                .status(status)
-                .bookId(bookId)
-                .duration(duration)
-                .endDate(endDate)
-                .review(review)
-                .build();
+            bookRecordMapper.insertBookRecord(bookRecord);
+        } else {
+            // 독서 세션이 없으면 duration과 endDate를 파라미터로 받아서 생성
+            if (duration == null || endDate == null) {
+                throw new IllegalArgumentException("독서 세션이 없을 경우 duration과 endDate는 필수입니다.");
+            }
+            
+            bookRecord = BookRecord.builder()
+                    .userId(userId)
+                    .status(status)
+                    .bookId(bookId)  // 필수
+                    .duration(duration)
+                    .endDate(endDate)
+                    .review(review)
+                    .build();
 
-        bookRecordMapper.insertBookRecord(bookRecord);
+            bookRecordMapper.insertBookRecord(bookRecord);
+        }
 
         // ✅ status가 FINISHED라면 receipt 생성 로직 실행
         if ("FINISHED".equalsIgnoreCase(status)) {
@@ -432,7 +485,180 @@ public class BookService {
         return result;
     }
 
-    
+    /**
+     * 독서 세션 시작
+     * @param userId 사용자 ID
+     * @return ReadingSessionResponse 독서 세션 정보
+     */
+    @Transactional
+    public ReadingSessionResponse startReadingSession(Integer userId) {
+        // 기존 활성 세션이 있는지 확인
+        ReadingSession existingSession = readingSessionMapper.findActiveSession(userId);
+        
+        if (existingSession != null) {
+            // 기존 세션이 있으면 그대로 반환
+            return convertToReadingSessionResponse(existingSession);
+        }
+        
+        // 새 세션 생성
+        ReadingSession newSession = ReadingSession.builder()
+                .userId(userId)
+                .status("READING")
+                .startDate(LocalDateTime.now())
+                .accumulatedDuration(0)
+                .build();
+        
+        readingSessionMapper.insertSession(newSession);
+        
+        return ReadingSessionResponse.builder()
+                .id(newSession.getId())
+                .userId(userId)
+                .bookId(null)
+                .status("READING")
+                .startDate(newSession.getStartDate())
+                .accumulatedDuration(0)
+                .currentSessionDuration(0)
+                .build();
+    }
 
+    /**
+     * 독서 일시정지
+     * @param userId 사용자 ID
+     * @return ReadingSessionResponse 독서 세션 정보
+     */
+    @Transactional
+    public ReadingSessionResponse pauseReadingSession(Integer userId) {
+        ReadingSession session = readingSessionMapper.findActiveSession(userId);
+        
+        if (session == null || !"READING".equals(session.getStatus())) {
+            throw new IllegalStateException("일시정지할 수 있는 활성 독서 세션이 없습니다.");
+        }
+        
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime lastResumedAt = session.getLastResumedAt() != null 
+                ? session.getLastResumedAt() 
+                : session.getStartDate();
+        
+        // 마지막 재개 시간부터 현재까지의 시간 계산 (분 단위)
+        long minutesSinceResume = ChronoUnit.MINUTES.between(lastResumedAt, now);
+        int newAccumulatedDuration = (session.getAccumulatedDuration() != null ? session.getAccumulatedDuration() : 0) 
+                + (int) minutesSinceResume;
+        
+        session.setStatus("PAUSED");
+        session.setLastPausedAt(now);
+        session.setAccumulatedDuration(newAccumulatedDuration);
+        
+        readingSessionMapper.updateSession(session);
+        
+        return convertToReadingSessionResponse(session);
+    }
+
+    /**
+     * 독서 재개
+     * @param userId 사용자 ID
+     * @return ReadingSessionResponse 독서 세션 정보
+     */
+    @Transactional
+    public ReadingSessionResponse resumeReadingSession(Integer userId) {
+        ReadingSession session = readingSessionMapper.findActiveSession(userId);
+        
+        if (session == null || !"PAUSED".equals(session.getStatus())) {
+            throw new IllegalStateException("재개할 수 있는 일시정지된 독서 세션이 없습니다.");
+        }
+        
+        session.setStatus("READING");
+        session.setLastResumedAt(LocalDateTime.now());
+        
+        readingSessionMapper.updateSession(session);
+        
+        return convertToReadingSessionResponse(session);
+    }
+
+    /**
+     * 독서 종료 (독후감 작성 전)
+     * @param userId 사용자 ID
+     * @return ReadingSession 종료된 독서 세션
+     */
+    @Transactional
+    public ReadingSession stopReadingSession(Integer userId) {
+        ReadingSession session = readingSessionMapper.findActiveSession(userId);
+        
+        if (session == null) {
+            throw new IllegalStateException("종료할 수 있는 활성 독서 세션이 없습니다.");
+        }
+        
+        LocalDateTime now = LocalDateTime.now();
+        int finalDuration = session.getAccumulatedDuration() != null ? session.getAccumulatedDuration() : 0;
+        
+        // READING 상태였다면 마지막 재개 시간부터 현재까지의 시간 추가
+        if ("READING".equals(session.getStatus())) {
+            LocalDateTime lastResumedAt = session.getLastResumedAt() != null 
+                    ? session.getLastResumedAt() 
+                    : session.getStartDate();
+            long minutesSinceResume = ChronoUnit.MINUTES.between(lastResumedAt, now);
+            finalDuration += (int) minutesSinceResume;
+        }
+        
+        // 세션 종료 처리
+        session.setEndDate(now);
+        session.setFinalDuration(finalDuration);
+        session.setAccumulatedDuration(finalDuration);
+        
+        readingSessionMapper.updateSession(session);
+        
+        return session;
+    }
+
+    /**
+     * 현재 독서 세션 조회
+     * @param userId 사용자 ID
+     * @return ReadingSessionResponse 독서 세션 정보
+     */
+    public ReadingSessionResponse getCurrentReadingSession(Integer userId) {
+        ReadingSession session = readingSessionMapper.findActiveSession(userId);
+        
+        if (session == null) {
+            return null;
+        }
+        
+        return convertToReadingSessionResponse(session);
+    }
+
+    /**
+     * ReadingSession을 ReadingSessionResponse로 변환
+     */
+    private ReadingSessionResponse convertToReadingSessionResponse(ReadingSession session) {
+        int currentSessionDuration = session.getAccumulatedDuration() != null 
+                ? session.getAccumulatedDuration() 
+                : 0;
+        
+        // READING 상태이고 lastResumedAt이 있으면 현재까지의 시간 추가 계산
+        if ("READING".equals(session.getStatus()) && session.getLastResumedAt() != null) {
+            long minutesSinceResume = ChronoUnit.MINUTES.between(
+                    session.getLastResumedAt(), 
+                    LocalDateTime.now()
+            );
+            currentSessionDuration += (int) minutesSinceResume;
+        } else if ("READING".equals(session.getStatus()) && session.getStartDate() != null) {
+            // lastResumedAt이 없으면 startDate부터 계산
+            long minutesSinceStart = ChronoUnit.MINUTES.between(
+                    session.getStartDate(), 
+                    LocalDateTime.now()
+            );
+            currentSessionDuration = (int) minutesSinceStart;
+        }
+        
+        return ReadingSessionResponse.builder()
+                .id(session.getId())
+                .userId(session.getUserId())
+                .bookId(null)  // 독서 세션에는 bookId가 없음
+                .status(session.getStatus())
+                .startDate(session.getStartDate())
+                .lastPausedAt(session.getLastPausedAt())
+                .lastResumedAt(session.getLastResumedAt())
+                .accumulatedDuration(session.getAccumulatedDuration())
+                .currentSessionDuration(currentSessionDuration)
+                .build();
+    }
 
 }

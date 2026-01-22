@@ -1,6 +1,7 @@
 package com.study.bookluck.controller;
 
 import com.study.bookluck.entity.BookRecord;
+import com.study.bookluck.entity.ReadingSession;
 import com.study.bookluck.service.*;
 import com.study.bookluck.dto.*;
 
@@ -98,25 +99,19 @@ public class BookController {
             return new ResponseEntity<>("userId를 정수형으로 변환할 수 없습니다.", HttpStatus.BAD_REQUEST);
         }
 
-        String status = (String) payload.get("status"); // status 추가
+        String status = (String) payload.get("status");
         String bookId = (String) payload.get("bookId");
         Integer duration = (Integer) payload.get("duration");
         String endDate = (String) payload.get("endDate");
-        String review = (String) payload.get("review"); // review 추가
+        String review = (String) payload.get("review");
 
-        // 필수 파라미터 검사 (status는 항상 필수)
+        // 필수 파라미터 검사
         if (userId == null || status == null || bookId == null) {
             return new ResponseEntity<>("필수 파라미터(userId, status, bookId)가 누락되었습니다.", HttpStatus.BAD_REQUEST);
         }
 
-        // status가 'FINISHED'일 경우 duration과 endDate는 필수로 간주
-        if ("FINISHED".equalsIgnoreCase(status)) {
-            if (duration == null || endDate == null) {
-                return new ResponseEntity<>("완독 상태(FINISHED)의 경우 duration과 endDate는 필수입니다.", HttpStatus.BAD_REQUEST);
-            }
-        }
-        // status가 'READING' 또는 'DROPPED'일 경우 duration, endDate, review는 선택 사항
-        // 이 경우 null로 넘겨도 됨.
+        // 독서 세션이 있으면 duration과 endDate는 자동으로 설정되므로 선택 사항
+        // 독서 세션이 없을 경우에만 duration과 endDate가 필수
 
         boolean isSuccess = bookService.addBookRecord(userId, status, bookId, duration, endDate, review);
 
@@ -170,7 +165,121 @@ public class BookController {
         return bookService.getWeeklyReadingTime(userId);
     }
 
+    /**
+     * 독서 세션 시작
+     * POST /books/reading/start
+     */
+    @PostMapping("/books/reading/start")
+    public ResponseEntity<?> startReading(@RequestBody Map<String, Object> payload) {
+        try {
+            Integer userId = extractUserId(payload);
+            
+            if (userId == null) {
+                return new ResponseEntity<>("필수 파라미터(userId)가 누락되었습니다.", HttpStatus.BAD_REQUEST);
+            }
+            
+            ReadingSessionResponse session = bookService.startReadingSession(userId);
+            return ResponseEntity.ok(session);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 
+    /**
+     * 독서 일시정지
+     * POST /books/reading/pause
+     */
+    @PostMapping("/books/reading/pause")
+    public ResponseEntity<?> pauseReading(@RequestBody Map<String, Object> payload) {
+        try {
+            Integer userId = extractUserId(payload);
+            
+            if (userId == null) {
+                return new ResponseEntity<>("필수 파라미터(userId)가 누락되었습니다.", HttpStatus.BAD_REQUEST);
+            }
+            
+            ReadingSessionResponse session = bookService.pauseReadingSession(userId);
+            return ResponseEntity.ok(session);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 독서 재개
+     * POST /books/reading/resume
+     */
+    @PostMapping("/books/reading/resume")
+    public ResponseEntity<?> resumeReading(@RequestBody Map<String, Object> payload) {
+        try {
+            Integer userId = extractUserId(payload);
+            
+            if (userId == null) {
+                return new ResponseEntity<>("필수 파라미터(userId)가 누락되었습니다.", HttpStatus.BAD_REQUEST);
+            }
+            
+            ReadingSessionResponse session = bookService.resumeReadingSession(userId);
+            return ResponseEntity.ok(session);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 독서 종료 (deprecated - /books/record에서 자동으로 처리됨)
+     * POST /books/reading/stop
+     * @deprecated 이 엔드포인트는 더 이상 사용되지 않습니다. /books/record를 호출하면 자동으로 독서 세션이 종료됩니다.
+     */
+    @Deprecated
+    @PostMapping("/books/reading/stop")
+    public ResponseEntity<?> stopReading(@RequestBody Map<String, Object> payload) {
+        try {
+            Integer userId = extractUserId(payload);
+            
+            if (userId == null) {
+                return new ResponseEntity<>("필수 파라미터(userId)가 누락되었습니다.", HttpStatus.BAD_REQUEST);
+            }
+            
+            ReadingSession session = bookService.stopReadingSession(userId);
+            return ResponseEntity.ok(session);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 현재 독서 세션 조회
+     * GET /books/reading/current/{userId}
+     */
+    @GetMapping("/books/reading/current/{userId}")
+    public ResponseEntity<?> getCurrentReadingSession(@PathVariable("userId") Integer userId) {
+        ReadingSessionResponse session = bookService.getCurrentReadingSession(userId);
+        
+        if (session == null) {
+            return new ResponseEntity<>(Map.of("message", "활성 독서 세션이 없습니다."), HttpStatus.NOT_FOUND);
+        }
+        
+        return ResponseEntity.ok(session);
+    }
+
+    /**
+     * userId 추출 헬퍼 메서드
+     */
+    private Integer extractUserId(Map<String, Object> payload) {
+        Object userIdObj = payload.get("userId");
+        if (userIdObj instanceof Integer) {
+            return (Integer) userIdObj;
+        } else if (userIdObj instanceof String) {
+            return Integer.parseInt((String) userIdObj);
+        }
+        return null;
+    }
 
 }
 
