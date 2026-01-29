@@ -25,15 +25,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // 프로덕션 환경 확인
-        boolean isProduction = Arrays.asList(environment.getActiveProfiles()).contains("prod");
+        // 보안 활성화 여부 확인 (환경 변수로 제어 가능)
+        String securityEnabled = environment.getProperty("SECURITY_ENABLED", "false");
+        boolean isSecurityEnabled = Boolean.parseBoolean(securityEnabled);
         
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()));
         
-        if (isProduction) {
-            // 프로덕션: 보안 강화
+        if (isSecurityEnabled) {
+            // 보안 활성화: 인증 필요
             http.authorizeHttpRequests(auth -> auth
                 // 공개 API (인증 불필요)
                 .requestMatchers(
@@ -58,7 +59,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             );
         } else {
-            // 개발 환경: 모든 요청 허용
+            // 보안 비활성화: 모든 요청 허용 (테스트용)
             http.authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll()
             );
